@@ -1,0 +1,12 @@
+*.pyc
+Data/*
+Output/*
+dist/*
+build/*
+private/*
+Private/*
+docs/build/*
+docs/make.bat
+docs/Makefile
+.pytest_cache/v/cache/nodeids
+test/Output/*
