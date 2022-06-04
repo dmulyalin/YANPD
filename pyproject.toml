@@ -5,6 +5,21 @@ description = "Yet Another Neo4j Python Driver"
 authors = ["Denis <d.mulyalin@gmail.com>"]
 license = "MIT"
 
+readme = "README.md"
+homepage = "https://github.com/dmulyalin/YANPD"
+repository = "https://github.com/dmulyalin/YANPD"
+documentation = "https://github.com/dmulyalin/YANPD"
+keywords = ["Neo4j", "Python"]
+classifiers = [
+    "Topic :: Utilities",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+]
+
 [tool.poetry.dependencies]
 python = "^3.7"
 yangson = "^1.4.13"
