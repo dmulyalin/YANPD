@@ -6,22 +6,13 @@ import uuid
 sys.path.insert(0, "..")
 
 from yanpd import neoconnector
-
-conn_data = {
-    "url": "http://192.168.1.120:7474/",
-    "username": "neo4j",
-    "password": "s3cr3t",
-}
-
+from config import conn_data
 
 def test_discovery_api():
     conn = neoconnector(**conn_data)
     # pprint.pprint(conn.settings)
-    assert (
-        "transaction" in conn.settings
-    ), "Failed to communicate with Neo4j Discovery API"
-    assert "in_one_go" in conn.settings, "Failed to form 'in one go' URI"
-
+    assert hasattr(conn, "uri_transaction"), "Failed to communicate with Neo4j Discovery API"
+    assert hasattr(conn, "uri_in_one_go"), "Failed to form 'in one go' URI"
 
 # test_discovery_api()
 
@@ -201,9 +192,7 @@ def test_from_dict_method_create():
                 "name": "Eve",
             },
         ],
-        "links": [
-            {"type": "KNOWS", "source": n1, "target": n2, "since": "1995"},
-        ],
+        "links": [{"type": "KNOWS", "source": n1, "target": n2, "since": "1995"}],
     }
 
     res = conn.from_dict(data)
@@ -242,9 +231,7 @@ def test_from_dict_method_merge():
                 "name": "Eve",
             },
         ],
-        "links": [
-            {"type": "KNOWS", "source": n1, "target": n2, "since": "1995"},
-        ],
+        "links": [{"type": "KNOWS", "source": n1, "target": n2, "since": "1995"}],
     }
 
     res = conn.from_dict(data, method="merge")
@@ -287,9 +274,7 @@ def test_get_node_all():
                 "name": "Eve",
             },
         ],
-        "links": [
-            {"type": "KNOWS", "source": n1, "target": n2, "since": "1995"},
-        ],
+        "links": [{"type": "KNOWS", "source": n1, "target": n2, "since": "1995"}],
     }
     # push data to graph
     conn.from_dict(data)
@@ -342,9 +327,7 @@ def test_get_node_all_with_limit():
                 "name": "Eve",
             },
         ],
-        "links": [
-            {"type": "KNOWS", "source": n1, "target": n2, "since": "1995"},
-        ],
+        "links": [{"type": "KNOWS", "source": n1, "target": n2, "since": "1995"}],
     }
     # push data to graph
     conn.from_dict(data)
@@ -392,9 +375,7 @@ def test_get_node_all_order_by_age():
                 "name": "Eve",
             },
         ],
-        "links": [
-            {"type": "KNOWS", "source": n1, "target": n2, "since": "1995"},
-        ],
+        "links": [{"type": "KNOWS", "source": n1, "target": n2, "since": "1995"}],
     }
     # push data to graph
     conn.from_dict(data)
@@ -437,9 +418,7 @@ def test_get_node_all_order_by_age_descending():
                 "name": "Eve",
             },
         ],
-        "links": [
-            {"type": "KNOWS", "source": n1, "target": n2, "since": "1995"},
-        ],
+        "links": [{"type": "KNOWS", "source": n1, "target": n2, "since": "1995"}],
     }
     # push data to graph
     conn.from_dict(data)
@@ -482,9 +461,7 @@ def test_get_node_all_with_skip():
                 "name": "Eve",
             },
         ],
-        "links": [
-            {"type": "KNOWS", "source": n1, "target": n2, "since": "1995"},
-        ],
+        "links": [{"type": "KNOWS", "source": n1, "target": n2, "since": "1995"}],
     }
     # push data to graph
     conn.from_dict(data)
@@ -525,9 +502,7 @@ def test_get_node_by_uuid():
                 "name": "Eve",
             },
         ],
-        "links": [
-            {"type": "KNOWS", "source": n1, "target": n2, "since": "1995"},
-        ],
+        "links": [{"type": "KNOWS", "source": n1, "target": n2, "since": "1995"}],
     }
     # push data to graph
     conn.from_dict(data)
@@ -569,9 +544,7 @@ def test_get_node_by_properties():
                 "name": "Eve",
             },
         ],
-        "links": [
-            {"type": "KNOWS", "source": n1, "target": n2, "since": "1995"},
-        ],
+        "links": [{"type": "KNOWS", "source": n1, "target": n2, "since": "1995"}],
     }
     # push data to graph
     conn.from_dict(data)
@@ -613,9 +586,7 @@ def test_get_node_by_properties_with_labels():
                 "name": "Eve",
             },
         ],
-        "links": [
-            {"type": "KNOWS", "source": n1, "target": n2, "since": "1995"},
-        ],
+        "links": [{"type": "KNOWS", "source": n1, "target": n2, "since": "1995"}],
     }
     # push data to graph
     conn.from_dict(data)
@@ -734,7 +705,7 @@ def test_delete_node_by_uuid():
                 "age": 40,
                 "weight": 70,
                 "name": "Gus",
-            },
+            }
         ]
     }
     # push data to graph
@@ -770,7 +741,7 @@ def test_delete_node_by_labels_and_properties():
                 "age": 40,
                 "weight": 70,
                 "name": "Gus",
-            },
+            }
         ]
     }
     # push data to graph
@@ -794,6 +765,7 @@ def test_delete_node_by_labels_and_properties():
 
 
 # test_delete_node_by_labels_and_properties()
+
 
 def test_get_link_all():
     n1 = str(uuid.uuid1())
@@ -831,15 +803,15 @@ def test_get_link_all():
         "links": [
             {"type": "KNOWS", "source": n1, "target": n2, "since": "1995"},
             {"type": "KNOWS", "source": n2, "target": n3, "friends": True},
-            {"type": "WORK_WITH", "source": n3, "target": n1, "employer": "ARPNAC"}
+            {"type": "WORK_WITH", "source": n3, "target": n1, "employer": "ARPNAC"},
         ],
-    }    
-    
+    }
+
     # push data to graph
     conn.from_dict(data)
 
     # get all links
-    res = conn.get_link(dry_run=False)    
+    res = conn.get_link(dry_run=False)
     # pprint.pprint(res)
     # {'errors': [],
     #  'results': [{'columns': ['link'],
@@ -854,10 +826,11 @@ def test_get_link_all():
     #                        {'meta': [{'deleted': False,
     #                                   'id': 8737,
     #                                   'type': 'relationship'}],
-    #                         'row': [{'friends': True}]}]}]}   
+    #                         'row': [{'friends': True}]}]}]}
     assert res["errors"] == []
     assert len(res["results"][0]["data"]) == 3
-    
+
+
 # test_get_link_all()
 
 
@@ -897,20 +870,21 @@ def test_get_link_skip():
         "links": [
             {"type": "KNOWS", "source": n1, "target": n2, "since": "1995"},
             {"type": "KNOWS", "source": n2, "target": n3, "friends": True},
-            {"type": "WORK_WITH", "source": n3, "target": n1, "employer": "ARPNAC"}
+            {"type": "WORK_WITH", "source": n3, "target": n1, "employer": "ARPNAC"},
         ],
-    }    
-    
+    }
+
     # push data to graph
     conn.from_dict(data)
 
     # get all links
-    res = conn.get_link(dry_run=False, skip=1)    
+    res = conn.get_link(dry_run=False, skip=1)
     # pprint.pprint(res)
-  
+
     assert res["errors"] == []
     assert len(res["results"][0]["data"]) == 2
-    
+
+
 # test_get_link_skip()
 
 
@@ -950,21 +924,23 @@ def test_get_link_limit():
         "links": [
             {"type": "KNOWS", "source": n1, "target": n2, "since": "1995"},
             {"type": "KNOWS", "source": n2, "target": n3, "friends": True},
-            {"type": "WORK_WITH", "source": n3, "target": n1, "employer": "ARPNAC"}
+            {"type": "WORK_WITH", "source": n3, "target": n1, "employer": "ARPNAC"},
         ],
-    }    
-    
+    }
+
     # push data to graph
     conn.from_dict(data)
 
     # get all links
-    res = conn.get_link(dry_run=False, limit=2)    
+    res = conn.get_link(dry_run=False, limit=2)
     # pprint.pprint(res)
-  
+
     assert res["errors"] == []
     assert len(res["results"][0]["data"]) == 2
-    
+
+
 # test_get_link_limit()
+
 
 def test_get_link_by_type():
     n1 = str(uuid.uuid1())
@@ -1002,20 +978,21 @@ def test_get_link_by_type():
         "links": [
             {"type": "KNOWS", "source": n1, "target": n2, "since": "1995"},
             {"type": "KNOWS", "source": n2, "target": n3, "friends": True},
-            {"type": "WORK_WITH", "source": n3, "target": n1, "employer": "ARPNAC"}
+            {"type": "WORK_WITH", "source": n3, "target": n1, "employer": "ARPNAC"},
         ],
-    }    
-    
+    }
+
     # push data to graph
     conn.from_dict(data)
 
     # get all links
-    res = conn.get_link(dry_run=False, type="WORK_WITH")    
+    res = conn.get_link(dry_run=False, type="WORK_WITH")
     # pprint.pprint(res, width=100)
-  
+
     assert res["errors"] == []
     assert len(res["results"][0]["data"]) == 1
-    
+
+
 # test_get_link_by_type()
 
 
@@ -1055,20 +1032,21 @@ def test_get_link_by_property():
         "links": [
             {"type": "KNOWS", "source": n1, "target": n2, "since": 1995},
             {"type": "KNOWS", "source": n2, "target": n3, "friends": True},
-            {"type": "WORK_WITH", "source": n3, "target": n1, "employer": "ARPNAC"}
+            {"type": "WORK_WITH", "source": n3, "target": n1, "employer": "ARPNAC"},
         ],
-    }    
-    
+    }
+
     # push data to graph
     conn.from_dict(data)
 
     # get all links
-    res = conn.get_link(dry_run=False, properties={"since": 1995})    
+    res = conn.get_link(dry_run=False, properties={"since": 1995})
     # pprint.pprint(res, width=100)
-  
+
     assert res["errors"] == []
     assert len(res["results"][0]["data"]) == 1
-    
+
+
 # test_get_link_by_property()
 
 
@@ -1108,21 +1086,30 @@ def test_get_link_by_property_and_type():
         "links": [
             {"type": "KNOWS", "source": n1, "target": n2, "since": 1995},
             {"type": "KNOWS", "source": n2, "target": n3, "friends": True},
-            {"type": "WORK_WITH", "source": n3, "target": n1, "employer": "ARPNAC", "rank": 10}
+            {
+                "type": "WORK_WITH",
+                "source": n3,
+                "target": n1,
+                "employer": "ARPNAC",
+                "rank": 10,
+            },
         ],
-    }    
-    
+    }
+
     # push data to graph
     conn.from_dict(data)
 
     # get all links
-    res = conn.get_link(dry_run=False, properties={"employer": "ARPNAC", "rank": 10}, type="WORK_WITH")    
+    res = conn.get_link(
+        dry_run=False, properties={"employer": "ARPNAC", "rank": 10}, type="WORK_WITH"
+    )
     # pprint.pprint(res, width=100)
-  
+
     assert res["errors"] == []
     assert len(res["results"][0]["data"]) == 1
     assert res["results"][0]["data"][0]["row"][0]["rank"] == 10
-    
+
+
 # test_get_link_by_property_and_type()
 
 
@@ -1162,22 +1149,30 @@ def test_get_link_by_source_labels():
         "links": [
             {"type": "KNOWS", "source": n1, "target": n2, "since": 1995},
             {"type": "KNOWS", "source": n2, "target": n3, "friends": True},
-            {"type": "WORK_WITH", "source": n3, "target": n1, "employer": "ARPNAC", "rank": 10}
+            {
+                "type": "WORK_WITH",
+                "source": n3,
+                "target": n1,
+                "employer": "ARPNAC",
+                "rank": 10,
+            },
         ],
-    }    
-    
+    }
+
     # push data to graph
     conn.from_dict(data)
 
     # get all links
-    res = conn.get_link(dry_run=False, source_labels=["PERSON", "Doctor"])    
+    res = conn.get_link(dry_run=False, source_labels=["PERSON", "Doctor"])
     # pprint.pprint(res, width=100)
-  
+
     assert res["errors"] == []
     assert len(res["results"][0]["data"]) == 2
     assert res["results"][0]["data"][1]["row"][0]["rank"] == 10
-    
+
+
 # test_get_link_by_source_labels()
+
 
 def test_get_link_by_source_labels_and_properties():
     n1 = str(uuid.uuid1())
@@ -1215,21 +1210,30 @@ def test_get_link_by_source_labels_and_properties():
         "links": [
             {"type": "KNOWS", "source": n1, "target": n2, "since": 1995},
             {"type": "KNOWS", "source": n2, "target": n3, "friends": True},
-            {"type": "WORK_WITH", "source": n3, "target": n1, "employer": "ARPNAC", "rank": 10}
+            {
+                "type": "WORK_WITH",
+                "source": n3,
+                "target": n1,
+                "employer": "ARPNAC",
+                "rank": 10,
+            },
         ],
-    }    
-    
+    }
+
     # push data to graph
     conn.from_dict(data)
 
     # get all links
-    res = conn.get_link(dry_run=False, source_labels=["PERSON", "Doctor"], source_properties={"age": 29})    
+    res = conn.get_link(
+        dry_run=False, source_labels=["PERSON", "Doctor"], source_properties={"age": 29}
+    )
     # pprint.pprint(res, width=100)
-  
+
     assert res["errors"] == []
     assert len(res["results"][0]["data"]) == 2
     assert res["results"][0]["data"][1]["row"][0]["rank"] == 10
-   
+
+
 # test_get_link_by_source_labels_and_properties()
 
 
@@ -1269,21 +1273,28 @@ def test_get_link_by_target_labels():
         "links": [
             {"type": "KNOWS", "source": n1, "target": n2, "since": 1995},
             {"type": "KNOWS", "source": n2, "target": n3, "friends": True},
-            {"type": "WORK_WITH", "source": n3, "target": n1, "employer": "ARPNAC", "rank": 10}
+            {
+                "type": "WORK_WITH",
+                "source": n3,
+                "target": n1,
+                "employer": "ARPNAC",
+                "rank": 10,
+            },
         ],
-    }    
-    
+    }
+
     # push data to graph
     conn.from_dict(data)
 
     # get all links
-    res = conn.get_link(dry_run=False, target_labels=["PERSON", "Engineer"])    
+    res = conn.get_link(dry_run=False, target_labels=["PERSON", "Engineer"])
     # pprint.pprint(res, width=100)
-  
+
     assert res["errors"] == []
     assert len(res["results"][0]["data"]) == 2
     assert res["results"][0]["data"][0]["row"][0]["since"] == 1995
-    
+
+
 # test_get_link_by_target_labels()
 
 
@@ -1323,20 +1334,35 @@ def test_get_link_by_target_labels_and_properties():
         "links": [
             {"type": "KNOWS", "source": n1, "target": n2, "since": 1995},
             {"type": "KNOWS", "source": n2, "target": n3, "friends": True},
-            {"type": "WORK_WITH", "source": n3, "target": n1, "employer": "ARPNAC", "rank": 10}
+            {
+                "type": "WORK_WITH",
+                "source": n3,
+                "target": n1,
+                "employer": "ARPNAC",
+                "rank": 10,
+            },
         ],
-    }    
-    
+    }
+
     # push data to graph
     conn_new.from_dict(data)
-    res_dry = conn_new.get_link(dry_run=True, target_labels=["PERSON", "Engineer"], target_properties={"age": 40})
+    res_dry = conn_new.get_link(
+        dry_run=True,
+        target_labels=["PERSON", "Engineer"],
+        target_properties={"age": 40},
+    )
     # pprint.pprint(res_dry)
-    # get all links                                        
-    res = conn_new.get_link(dry_run=False, target_labels=["PERSON", "Engineer"], target_properties={"age": 40})   
+    # get all links
+    res = conn_new.get_link(
+        dry_run=False,
+        target_labels=["PERSON", "Engineer"],
+        target_properties={"age": 40},
+    )
     # pprint.pprint(res, width=100)
     assert res["errors"] == []
     assert len(res["results"][0]["data"]) == 2, res_dry
-    
+
+
 # test_get_link_by_target_labels_and_properties()
 
 
@@ -1376,19 +1402,26 @@ def test_get_link_by_source_uuid():
         "links": [
             {"type": "KNOWS", "source": n1, "target": n2, "since": 1995},
             {"type": "KNOWS", "source": n2, "target": n3, "friends": True},
-            {"type": "WORK_WITH", "source": n3, "target": n1, "employer": "ARPNAC", "rank": 10}
+            {
+                "type": "WORK_WITH",
+                "source": n3,
+                "target": n1,
+                "employer": "ARPNAC",
+                "rank": 10,
+            },
         ],
-    }    
-    
+    }
+
     # push data to graph
     conn.from_dict(data)
 
     # get all links
-    res = conn.get_link(dry_run=False, source=n1)    
+    res = conn.get_link(dry_run=False, source=n1)
     # pprint.pprint(res, width=100)
-  
+
     assert res["errors"] == []
     assert len(res["results"][0]["data"]) == 2
+
 
 # test_get_link_by_source_uuid()
 
@@ -1429,22 +1462,30 @@ def test_get_link_by_source_and_target_uuid():
         "links": [
             {"type": "KNOWS", "source": n1, "target": n2, "since": 1995},
             {"type": "KNOWS", "source": n2, "target": n3, "friends": True},
-            {"type": "WORK_WITH", "source": n3, "target": n1, "employer": "ARPNAC", "rank": 10}
+            {
+                "type": "WORK_WITH",
+                "source": n3,
+                "target": n1,
+                "employer": "ARPNAC",
+                "rank": 10,
+            },
         ],
-    }    
-    
+    }
+
     # push data to graph
     conn.from_dict(data)
 
     # get all links
-    res = conn.get_link(dry_run=False, source=n1, target=n2)    
+    res = conn.get_link(dry_run=False, source=n1, target=n2)
     # pprint.pprint(res, width=100)
-  
+
     assert res["errors"] == []
     assert len(res["results"][0]["data"]) == 1
     assert res["results"][0]["data"][0]["row"][0]["since"] == 1995
-    
+
+
 # test_get_link_by_source_and_target_uuid()
+
 
 def get_link_all_order_by_and_desc():
     """
@@ -1485,29 +1526,37 @@ def get_link_all_order_by_and_desc():
         "links": [
             {"type": "KNOWS", "source": n1, "target": n2, "since": "1995", "order": 1},
             {"type": "KNOWS", "source": n2, "target": n3, "friends": True, "order": 2},
-            {"type": "WORK_WITH", "source": n3, "target": n1, "employer": "ARPNAC", "order": 3}
+            {
+                "type": "WORK_WITH",
+                "source": n3,
+                "target": n1,
+                "employer": "ARPNAC",
+                "order": 3,
+            },
         ],
-    }    
-    
+    }
+
     # push data to graph
     conn.from_dict(data)
 
     # get all links
-    res = conn.get_link(dry_run=False, order_by="order")   
-    res_desc = conn.get_link(dry_run=False, order_by="order", descending=True)           
+    res = conn.get_link(dry_run=False, order_by="order")
+    res_desc = conn.get_link(dry_run=False, order_by="order", descending=True)
     # pprint.pprint(res)
     # pprint.pprint(res_desc)
-    assert res['errors'] == []
+    assert res["errors"] == []
     assert res["results"][0]["data"][0]["row"][0]["order"] == 1
     assert res["results"][0]["data"][1]["row"][0]["order"] == 2
-    assert res["results"][0]["data"][2]["row"][0]["order"] == 3                                           
-    assert res_desc['errors'] == []
+    assert res["results"][0]["data"][2]["row"][0]["order"] == 3
+    assert res_desc["errors"] == []
     assert res_desc["results"][0]["data"][0]["row"][0]["order"] == 3
     assert res_desc["results"][0]["data"][1]["row"][0]["order"] == 2
-    assert res_desc["results"][0]["data"][2]["row"][0]["order"] == 1   
+    assert res_desc["results"][0]["data"][2]["row"][0]["order"] == 1
+
 
 # get_link_all_order_by_and_desc()
-    
+
+
 def test_get_link_by_type_and_properties_source_and_target_labels_and_properties():
     """
     Test them all
@@ -1547,40 +1596,58 @@ def test_get_link_by_type_and_properties_source_and_target_labels_and_properties
         "links": [
             {"type": "KNOWS", "source": n1, "target": n2, "since": 1995},
             {"type": "KNOWS", "source": n2, "target": n3, "friends": True},
-            {"type": "WORK_WITH", "source": n3, "target": n1, "employer": "ARPNAC", "rank": 10}
+            {
+                "type": "WORK_WITH",
+                "source": n3,
+                "target": n1,
+                "employer": "ARPNAC",
+                "rank": 10,
+            },
         ],
-    }    
-    
+    }
+
     # push data to graph
     conn_new.from_dict(data)
     res_dry = conn_new.get_link(
-        dry_run=True, 
-        target_labels=["PERSON", "Engineer"], 
+        dry_run=True,
+        target_labels=["PERSON", "Engineer"],
         target_properties={"age": 40},
         source_labels=["PERSON"],
         source_properties={"age": 29},
         type="WORK_WITH",
-        properties={"rank": 10, "employer": "ARPNAC"}
+        properties={"rank": 10, "employer": "ARPNAC"},
     )
-    should_contain = ["PERSON", "Engineer", "age", "WORK_WITH", "rank", "employer", "ARPNAC"]
-    assert all([i in res_dry["statement"] for i in should_contain]), "query malformed and does not contains all parameters: {}".format(res_dry)
+    should_contain = [
+        "PERSON",
+        "Engineer",
+        "age",
+        "WORK_WITH",
+        "rank",
+        "employer",
+        "ARPNAC",
+    ]
+    assert all(
+        [i in res_dry["statement"] for i in should_contain]
+    ), "query malformed and does not contains all parameters: {}".format(res_dry)
     # pprint.pprint(res_dry, width=150)
-    # get all links                                        
+    # get all links
     res = conn_new.get_link(
-        dry_run=False, 
-        target_labels=["PERSON", "Engineer"], 
+        dry_run=False,
+        target_labels=["PERSON", "Engineer"],
         target_properties={"age": 40},
         source_labels=["PERSON"],
         source_properties={"age": 29},
         type="WORK_WITH",
-        properties={"rank": 10, "employer": "ARPNAC"}
-    )   
+        properties={"rank": 10, "employer": "ARPNAC"},
+    )
     # pprint.pprint(res, width=100)
     assert res["errors"] == []
     assert len(res["results"][0]["data"]) == 1
     assert res["results"][0]["data"][0]["row"][0]["rank"] == 10
-    
+
+
 # test_get_link_by_type_and_properties_source_and_target_labels_and_properties()
+
 
 def test_delete_link():
     n1 = str(uuid.uuid1())
@@ -1618,26 +1685,36 @@ def test_delete_link():
         "links": [
             {"type": "KNOWS", "source": n1, "target": n2, "since": 1995},
             {"type": "KNOWS", "source": n2, "target": n3, "friends": True},
-            {"type": "WORK_WITH", "source": n3, "target": n1, "employer": "ARPNAC", "rank": 10}
+            {
+                "type": "WORK_WITH",
+                "source": n3,
+                "target": n1,
+                "employer": "ARPNAC",
+                "rank": 10,
+            },
         ],
-    }    
-    
+    }
+
     # push data to graph
     conn.from_dict(data)
 
     # update link
-    res = conn.delete_link(dry_run=False, source=n3, target=n1, type="WORK_WITH", properties={"rank": 10})    
+    res = conn.delete_link(
+        dry_run=False, source=n3, target=n1, type="WORK_WITH", properties={"rank": 10}
+    )
     # pprint.pprint(res, width=100)
     assert res["errors"] == []
-    
+
     # try to get deleted link
     get_del_res = conn.get_link(dry_run=False, properties={"rank": 10})
     # pprint.pprint(get_del_res)
 
     assert get_del_res["errors"] == []
     assert len(get_del_res["results"][0]["data"]) == 0
-    
+
+
 # test_delete_link()
+
 
 def test_link_update_properties():
     """
@@ -1678,24 +1755,39 @@ def test_link_update_properties():
         "links": [
             {"type": "KNOWS", "source": n1, "target": n2, "since": 1995},
             {"type": "KNOWS", "source": n2, "target": n3, "friends": True},
-            {"type": "WORK_WITH", "source": n3, "target": n1, "employer": "ARPNAC", "rank": 10}
+            {
+                "type": "WORK_WITH",
+                "source": n3,
+                "target": n1,
+                "employer": "ARPNAC",
+                "rank": 10,
+            },
         ],
-    }    
-    
+    }
+
     # push data to graph
     create = conn1.from_dict(data)
     # pprint.pprint(create)
-    
+
     # update link
-    res = conn1.update_link(dry_run=False, source=n1, target=n2, type="KNOWS", new_properties={"grade": 1, "cost": 20})    
+    res = conn1.update_link(
+        dry_run=False,
+        source=n1,
+        target=n2,
+        type="KNOWS",
+        new_properties={"grade": 1, "cost": 20},
+    )
     # pprint.pprint(res, width=100)
-  
+
     # get updated link
     get_res = conn1.get_link(dry_run=False, properties={"cost": 20})
     # pprint.pprint(get_res)
 
     assert get_res["errors"] == []
-    assert len(get_res["results"][0]["data"]) == 1, "Try run this test individually, if fails, we have a problem- pytest test_neoconnector.py::test_link_update_properties"
+    assert (
+        len(get_res["results"][0]["data"]) == 1
+    ), "Try run this test individually, if fails, we have a problem- pytest test_neoconnector.py::test_link_update_properties"
     assert get_res["results"][0]["data"][0]["row"][0]["cost"] == 20
-    
+
+
 # test_link_update_properties()
