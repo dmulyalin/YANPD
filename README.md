@@ -12,7 +12,102 @@ populate Neo4j database using standard Python lists and dictionaries.
 YNPD does not expect you to know how to interact with individual classes but rather
 allows to load into and retrieve data from database using dictionary based requests. 
 
-**Data Validation** 
+**Data Validation** can be performed using YANG models.
+
+<details><summary>Sample YANG model</summary>
+
+module telecom-network {
+
+    yang-version 1.1;
+
+    namespace 'http://yanpd/network-device';
+
+    prefix tn;
+
+    revision 2022-01-10 {
+        description "Initial revision";
+    }
+
+    container nodes {
+
+        list network-device {
+            key uuid;
+            leaf uuid {
+                type string;
+                mandatory true;
+            }
+            leaf hostname {
+                type string;
+                mandatory true;
+                description "Device hostname";
+            }
+            leaf-list labels {
+                type string;
+                min-elements 1;
+				mandatory true;
+                description "List of node labels";
+            }
+            leaf serial-number {
+                type string;
+            }
+            leaf hardware-model {
+                type string;
+            }
+            leaf status {
+                type enumeration {
+                    enum decomisionned;
+                    enum production;
+                    enum provisioning;
+                }
+            }
+        }
+
+        list vendor {
+            key uuid;
+            leaf uuid {
+                type string;
+                mandatory true;
+            }
+            leaf name {
+                type string;
+                mandatory true;
+            }
+        }
+
+    }
+
+    container links {
+
+        list manufactured-by {
+            leaf type {
+                type string;
+                must "current() = 'manufactured-by'" {
+                    error-message "Link type must be 'manufactured-by'";
+                }
+				mandatory true;
+            }
+            leaf source {
+                type leafref {
+                    path "/nodes/network-device/uuid";
+                }
+                mandatory true;
+            }
+            leaf target {
+                type leafref {
+                    path "/nodes/vendor/uuid";
+                }
+                mandatory true;
+            }
+            leaf is-eof {
+                type boolean;
+                description "Is this platform EOF - end of life";
+                default false;
+            }
+        }
+
+    }
+}
+</details>
 
 # What it can do
 
