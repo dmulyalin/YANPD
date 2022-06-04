@@ -1,3 +1,5 @@
+[![PyPI][pypi-latest-release-badge]][pypi-latest-release-link]
+
 **YANPD - Yet Another Neo4j Python Driver**
 
 YANPD is a Neo4j graph database driver that uses HTTP API to perform CRUD (Create, 
@@ -164,3 +166,6 @@ module telecom-network {
 </details>
 
 Add FastAPI based gateway to expose YANPD functionality using REST API.
+
+[pypi-latest-release-badge]:   https://img.shields.io/pypi/v/yanpd.svg
+[pypi-latest-release-link]:    https://pypi.python.org/pypi/yanpd
