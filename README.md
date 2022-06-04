@@ -72,14 +72,11 @@ Add **Data Validation** using YANG models.
 
 <details><summary>Sample YANG model</summary>
 
+```
 module telecom-network {
-
     yang-version 1.1;
-
     namespace 'http://yanpd/network-device';
-
     prefix tn;
-
     revision 2022-01-10 {
         description "Initial revision";
     }
@@ -163,6 +160,7 @@ module telecom-network {
 
     }
 }
+```
 </details>
 
 Add FastAPI based gateway to expose YANPD functionality using REST API.
