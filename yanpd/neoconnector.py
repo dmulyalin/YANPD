@@ -48,6 +48,7 @@ import logging
 import uuid
 
 from typing import List, Tuple, Dict
+from .yang_validator import yang_validator
 
 default_cypher_collection = {
     "node_create": """
@@ -122,7 +123,8 @@ class neoconnector:
     :param password: (str) database password, default is ``neo4j``
     :param settings: (dict) neoconnector class settings dictionary
     :param enforce_uuid: (bool) if True creates ``uuid`` property unique constraint in Ne04j
-        database and adds ``uuid`` property to each link, default is False
+        database and automatically adds ``uuid`` property to each link, default is False
+    :param models_dir: OS path to directory with YANG models for data validation
     """
 
     def __init__(
@@ -133,6 +135,7 @@ class neoconnector:
         password: str = "neo4j",
         enforce_uuid: bool = False,
         requests_timeout: int = 30,
+        models_dir: str = None
     ):
         self.url = url
         self.databaseName = databaseName
@@ -141,7 +144,8 @@ class neoconnector:
         self.requests_timeout = requests_timeout
         self.uri_in_one_go = None
         self.supported_neo4j_version = ["4"]
-
+        self.validator = yang_validator(models_dir) if models_dir else None
+        
         # run through discovery API endpoints
         self.discover()
 
@@ -216,11 +220,11 @@ class neoconnector:
         statements = statements or []
         return self.send(statements=statements, tx="{}/commit".format(tx))
 
-    def from_dict(self, data: Dict, rate: int = 100, method: str = "create") -> List:
+    def from_dict(self, data: Dict, rate: int = 100, method: str = "create", model_name: str = None) -> List:
         """
         Function that takes nodes and links dictionary and creates them in Neo4j database.
 
-        Sample data dictionary::
+        Sample data dictionary using plain lists of nodes and links::
 
             {
                 "nodes": [
@@ -232,6 +236,25 @@ class neoconnector:
                 ]
             }
 
+        Sample data dictionary using dictionaries of nodes and links::
+
+            {
+                "nodes": {
+                    "PERSON": [
+                        {"labels": ["Engineer"], "uuid": "1234", "age": 40, "weight": 70, "name": "Gus"},
+                        {"labels": ["Teacher"], "uuid": "5678", "age": 35, "weight": 50, "name": "Eve"},
+                    ]
+                },
+                "links": {
+                    "KNOWS": [
+                        {"source": "1234", "target": "5678", "since": "1995"},
+                    ]
+                }
+            }
+            
+        Above data "nodes" dictionary should be keyed by common nodes labels, additional labels can
+        be specified using "labels" attribute. Data "links" dictionary should be keyed by link type.       
+        
         Each node dictionary must contain ``labels`` and ``uuid`` keys, other optional
         key-value pairs used as node properties.
 
@@ -253,48 +276,112 @@ class neoconnector:
         :param rate: (int) how many items create per transaction, must be >= 1, default 100
         :param method: (str) ``create`` (default) or ``merge``, create is faster, but merge
             allows to update existing nodes and links
+        :param model_name: YANG name model to use to validate the data
         :return: (list) list of Neo4j database response dictionaries
         """
         ret = []
         tx = None
         rate = max(1, rate)
+        
+        # validate data
+        if model_name and self.validator:
+            self.validator.validate(data, model_name=model_name)
+        
+        # push data to database
         try:
-            # create nodes
             node_process_method = (
                 self.update_node if method == "merge" else self.create_node
             )
-            for i in range(0, len(data.get("nodes", [])), rate):
-                # create statements list
-                statements = [
-                    node_process_method(
-                        labels=node.pop("labels"),
-                        uuid=node.pop("uuid"),
-                        properties=node,
-                        dry_run=True,
-                    )
-                    for node in data.get("nodes", [])[i : i + rate]
-                ]
-                # start and commit transaction
-                tx, resp = self.tx_start(statements)
-                ret.append(resp)
-                ret.append(self.tx_commit(tx))
-            # create links
-            for i in range(0, len(data.get("links", [])), rate):
-                # create statements list
-                statements = [
-                    self.create_link(
-                        source=link.pop("source"),
-                        target=link.pop("target"),
-                        type=link.pop("type"),
-                        properties=link,
-                        dry_run=True,
-                    )
-                    for link in data.get("links", [])[i : i + rate]
-                ]
-                # start and commit transaction
-                tx, resp = self.tx_start(statements)
-                ret.append(resp)
-                ret.append(self.tx_commit(tx))
+            # process list of nodes structure
+            if isinstance(data.get("nodes"), list):
+                for i in range(0, len(data["nodes"]), rate):
+                    # create statements list
+                    statements = [
+                        node_process_method(
+                            labels=node.pop("labels"),
+                            uuid=node.pop("uuid"),
+                            properties=node,
+                            dry_run=True,
+                        )
+                        for node in data.get("nodes", [])[i : i + rate]
+                    ]
+                    # start and commit transaction
+                    tx, resp = self.tx_start(statements)
+                    ret.append(resp)
+                    ret.append(self.tx_commit(tx))
+            # process dictionary of nodes structure
+            elif isinstance(data.get("nodes"), dict):
+                statements = []
+                for primary_label, node_items in data["nodes"].items():
+                    primary_label = primary_label.replace("-", "_")
+                    for node in node_items:
+                        labels = node.pop("labels", [primary_label])
+                        if primary_label not in labels:
+                            labels.append(primary_label)
+                        statements.append(
+                            node_process_method(
+                                labels=labels,
+                                uuid=node.pop("uuid"),
+                                properties=node,
+                                dry_run=True,
+                            )
+                        )                
+                        # start and commit transaction for this batch
+                        if len(statements) == rate:
+                            tx, resp = self.tx_start(statements)
+                            ret.append(resp)
+                            ret.append(self.tx_commit(tx))    
+                            statements = []
+                # do transaction for last batch
+                if statements:
+                    tx, resp = self.tx_start(statements)
+                    ret.append(resp)
+                    ret.append(self.tx_commit(tx))    
+            # process list of links structure
+            if isinstance(data.get("links"), list):
+                for i in range(0, len(data["links"]), rate):
+                    # create statements list
+                    statements = [
+                        self.create_link(
+                            source=link.pop("source"),
+                            target=link.pop("target"),
+                            type=link.pop("type"),
+                            properties=link,
+                            dry_run=True,
+                        )
+                        for link in data.get("links", [])[i : i + rate]
+                    ]
+                    # start and commit transaction
+                    tx, resp = self.tx_start(statements)
+                    ret.append(resp)
+                    ret.append(self.tx_commit(tx))
+            # process dict of links structure
+            elif isinstance(data.get("links"), dict):
+                statements = []            
+                for link_type, link_items in data["links"].items():
+                    link_type = link_type.replace("-", "_")
+                    for link in link_items:
+                        _ = link.pop("type", None) # clean link type
+                        statements.append(
+                            self.create_link(
+                                source=link.pop("source"),
+                                target=link.pop("target"),
+                                type=link_type,
+                                properties=link,
+                                dry_run=True,
+                            )
+                        )                
+                        # start and commit transaction for this batch
+                        if len(statements) == rate:
+                            tx, resp = self.tx_start(statements)
+                            ret.append(resp)
+                            ret.append(self.tx_commit(tx))    
+                            statements = []                    
+                # do transaction for last batch
+                if statements:
+                    tx, resp = self.tx_start(statements)
+                    ret.append(resp)
+                    ret.append(self.tx_commit(tx))                       
         except Exception as e:
             if tx:
                 self.tx_rollback(tx)
