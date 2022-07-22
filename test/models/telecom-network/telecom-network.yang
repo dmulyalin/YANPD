@@ -63,9 +63,6 @@ module telecom-network {
         list manufactured-by {
             leaf type {
                 type string;
-                must "current() = 'manufactured-by'" {
-                    error-message "Link type must be 'manufactured-by'";
-                }
 				mandatory true;
             }
             leaf source {

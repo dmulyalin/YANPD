@@ -144,6 +144,7 @@ class neoconnector:
         self.requests_timeout = requests_timeout
         self.uri_in_one_go = None
         self.supported_neo4j_version = ["4"]
+        self.models_dir = models_dir
         self.validator = yang_validator(models_dir) if models_dir else None
         
         # run through discovery API endpoints
@@ -285,6 +286,8 @@ class neoconnector:
         
         # validate data
         if model_name and self.validator:
+            # validator = yang_validator(models_dir=self.models_dir)
+            # _ = validator.validate(data, model_name=model_name)
             self.validator.validate(data, model_name=model_name)
         
         # push data to database
